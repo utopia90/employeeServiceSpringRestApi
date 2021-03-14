@@ -5,9 +5,11 @@ import com.example.springbootclasesservice.repository.EmployeeRepository;
 import com.example.springbootclasesservice.service.EmployeeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +53,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<Employee> findByMarried(Boolean married) {
-        return null;
+        if (married == null){
+            log.warn("Filtering by wrong married");
+            return new ArrayList<>();
+        }
+
+        return repository.findByMarried(married);
     }
 
     @Override
@@ -61,22 +68,31 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee createEmployee(Employee employee) {
-        return null;
+        return repository.save(employee);
     }
 
     @Override
     public Employee updateEmployee(Employee employee) {
-        return null;
+
+        return repository.save(employee);
     }
 
     @Override
-    public void deleteById(Long id) {
+    public ResponseEntity<Void> deleteById(Long id) {
+        if(!repository.existsById(id)) // Check if exist
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
+
 
     }
 
     @Override
-    public void deleteEmployees() {
-
+    public ResponseEntity<Void> deleteEmployees() {
+        log.debug("REST request to delete all employee");
+        repository.deleteAll();
+        return ResponseEntity.noContent().build();
     }
 
     @Override

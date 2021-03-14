@@ -7,8 +7,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -91,7 +93,7 @@ public class EmployeeController {
     public ResponseEntity<List<Employee>> filterByMarried(@ApiParam("Boolean que representa si está casado o no") @PathVariable Boolean married){
         log.debug("Filter all employees by married status: {}", married);
 
-        List<Employee> employees = repository.findByMarried(married);
+        List<Employee> employees = employeeService.findByMarried(married);
 
         if (employees.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -105,7 +107,7 @@ public class EmployeeController {
     public ResponseEntity<List<Employee>> filterByAgeGreater(@PathVariable Integer age){
         log.debug("REST request to filter employees by age: {}", age);
 
-        List<Employee> employees = repository.findAllByAgeAfter(age);
+        List<Employee> employees = employeeService.findByAgeGreater(age);
         if (employees.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
@@ -145,7 +147,7 @@ public class EmployeeController {
         if (employee.getId() != null) // != null means there is an employee in database
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        Employee employeeDB = repository.save(employee);
+        Employee employeeDB = employeeService.createEmployee(employee);
         return ResponseEntity
                 .created(new URI("/api/employees/" + employeeDB.getId()))
                 .body(employeeDB);
@@ -168,7 +170,7 @@ public class EmployeeController {
         }
         // Employee employeeDB = repository.save(employee);
         // return ResponseEntity.ok().body(employeeDB);
-        return ResponseEntity.ok().body(repository.save(employee));
+        return ResponseEntity.ok().body(employeeService.updateEmployee(employee));
     }
 
     // DELETE ONE
@@ -176,11 +178,8 @@ public class EmployeeController {
     @DeleteMapping("/employees/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id){
         log.debug("REST request to delete an employee by id {}", id);
-        if(!repository.existsById(id)) // Check if exist
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        repository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return employeeService.deleteById(id);
     }
 
     // DELETE ALL
@@ -188,17 +187,9 @@ public class EmployeeController {
     // @ApiIgnore
     @DeleteMapping("/employees")
     public ResponseEntity<Void> deleteEmployees(){
-        log.debug("REST request to delete all employee");
-        repository.deleteAll();
-        return ResponseEntity.noContent().build();
+       return employeeService.deleteEmployees();
     }
 
 
-    // Ejemplo Controlador MVC
-//    @GetMapping
-//    public String helloMVC(Model model){
-//        model.addAttribute("employee", new Employee());
-//        return "employee-list";
-//    }
-//    <span>${employee.name}</span>
+
 }

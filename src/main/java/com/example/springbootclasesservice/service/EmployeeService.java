@@ -1,6 +1,7 @@
 package com.example.springbootclasesservice.service;
 
 import com.example.springbootclasesservice.model.Employee;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,8 +28,8 @@ public interface EmployeeService {
     Employee updateEmployee(Employee employee);
 
     // DELETE
-    void deleteById(Long id);
-    void deleteEmployees();
+    ResponseEntity<Void> deleteById(Long id);
+    ResponseEntity<Void> deleteEmployees();
 
     // PROCESS
     Optional<Employee> processSalary(Long id);
